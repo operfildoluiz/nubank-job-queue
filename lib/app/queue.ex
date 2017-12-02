@@ -9,17 +9,13 @@ defmodule App.Queue do
 
     Returns a JSON.
 
-    ## Example
-
-        iex> App.Queue.main()
-        [{\"job_assigned\": {\"job_id\": \"c0033410-981c-428a-954a-35dec05ef1d2\",\"agent_id\": \"8ab86c18-3fae-4804-bfd9-c3d6e8f66260\"}},{\"job_assigned\": {\"job_id\": \"f26e890b-df8e-422e-a39c-7762aa0bac36\",\"agent_id\": \"ed0e23ef-6c2b-430c-9b90-cd4f1ff74c88\"}}]
-
     """
     def main() do
 
         IO.gets("Please, insert minified json: \n") |> String.replace("\n", "")
         |> Poison.decode!
         |> convert_json_to_map()
+        |> assign_jobs_to_agents()
 
     end
 
@@ -27,11 +23,6 @@ defmodule App.Queue do
     Create a list to be assigned, ordering jobs by urgent.
 
     Returns a keyword maplist.
-
-    ## Example
-
-        iex> App.Queue.convert_json_to_map(input, maplist)
-        [agents: ["ed0e23ef-6c2b-430c-9b90-cd4f1ff74c88": %{"id" => "ed0e23ef-6c2b-430c-9b90-cd4f1ff74c88", "name" => "Mr. Peanut Butter", "primary_skillset" => ["rewards-question"], "secondary_skillset" => ["bills-questions"]}, "8ab86c18-3fae-4804-bfd9-c3d6e8f66260": %{"id" => "8ab86c18-3fae-4804-bfd9-c3d6e8f66260", "name" => "BoJack Horseman", "primary_skillset" => ["bills-questions"], "secondary_skillset" => []}], jobs: ["c0033410-981c-428a-954a-35dec05ef1d2": %{"id" => "c0033410-981c-428a-954a-35dec05ef1d2", "type" => "bills-questions", "urgent" => true}, "f26e890b-df8e-422e-a39c-7762aa0bac36": %{"id" => "f26e890b-df8e-422e-a39c-7762aa0bac36", "type" => "rewards-question", "urgent" => false}, "690de6bc-163c-4345-bf6f-25dd0c58e864": %{"id" => "690de6bc-163c-4345-bf6f-25dd0c58e864", "type" => "bills-questions", "urgent" => false}], requests: [%{"agent_id" => "8ab86c18-3fae-4804-bfd9-c3d6e8f66260"}, %{"agent_id" => "ed0e23ef-6c2b-430c-9b90-cd4f1ff74c88"}]]
 
     """
     # Make sure maplist have proper structure
@@ -65,6 +56,8 @@ defmodule App.Queue do
    end
 
    @doc """
+   Set a new maplist with reordered job list.
+
    Returns a reorder maplist.
    """
    defp sort_jobs_by_urgency(maplist) do
@@ -94,4 +87,75 @@ defmodule App.Queue do
         end
    end
 
+
+   @doc """
+   Create a new maplist with :assignment list and dequeue job list
+
+   Return a new maplist
+   """
+   # Make sure this function receives proper arguments
+   defp assign_jobs_to_agents(map), do: assign_jobs_to_agents(map, map[:requests])
+   defp assign_jobs_to_agents(map, requests) do
+        if (length(requests) == 0) do
+            map
+        else
+            request = hd(requests)
+            agent = map[:agents][String.to_atom(request["agent_id"])]
+
+            if (agent == nil) do
+                raise ArgumentError, "agent_id does not match with any agent"
+            end
+
+            primary_search = find_elegible_job(map[:jobs], agent["primary_skillset"])
+            selected_job =
+            if(primary_search != nil) do
+                primary_search
+            else
+                find_elegible_job(map[:jobs], agent["secondary_skillset"])
+            end
+
+            new_map =
+            if (selected_job != nil) do
+                set_assignment(selected_job, agent["id"], map)
+            else
+                map
+            end
+
+            assign_jobs_to_agents(new_map, tl(requests))
+        end
+   end
+
+   @doc """
+   Find a elegible ob based in agent skillsets
+
+   Return a job id
+   """
+   defp find_elegible_job(jobs, skillset) do
+        if (length(jobs) == 0) do
+            nil
+        else
+            job = elem(hd(jobs), 1)
+            if(Enum.member?(skillset, job["type"])) do
+                job["id"]
+            else
+                find_elegible_job(tl(jobs), skillset)
+            end
+        end
+   end
+
+   @doc """
+   Set a new assignment with agent_id and job_id given
+
+   Return a maplist
+   """
+   defp set_assignment(job_id, agent_id, map) do
+        if (map[:assignments] == nil) do
+            set_assignment(job_id, agent_id, Keyword.put(map, :assignments, []))
+        else
+            assignment = [job_assigned: %{agent_id: agent_id, job_id: job_id}]
+            jobs = Keyword.drop(map[:jobs], [String.to_atom(job_id)]);
+
+            [agents: map[:agents], jobs: jobs, requests: map[:requests], assignments: map[:assignments] ++ assignment]
+        end
+   end
 end
