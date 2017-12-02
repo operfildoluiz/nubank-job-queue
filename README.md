@@ -1,27 +1,27 @@
 [![20132106327144.jpg](https://s8.postimg.org/of5yopnt1/20132106327144.jpg)](https://postimg.org/image/npn6ccn9d/)
 
-This is a private project developed for Nubank Sotware Engineer Hiring Process.
+This is a private project developed for Nubank's Software Engineer Hiring Process.
 
 # The context
 
-Since Nubank is a large company, that's very important assure quality and efficiency in Customer Experience department. As customers make questions through social media and service channels, a job queue service sounds good to improve speed and agility in the process.
+Since Nubank is a large company, it's very important to assure quality and efficiency in Customer Experience. As customers make questions through social media and service channels, a job queue service sounds good to improve speed and agility in the process of answering everyone.
 
 # The proposal
 
-Given a JSON string via stdin, the algorithm must be able to assign jobs to the agents, ensuring that it follows some rules:
+Given a JSON string via stdin, the algorithm must be able to assign jobs to agents, ensuring that it follows some rules:
 
- - First in, first out: The first job entered in the system should be assigned first, unless it have an urgent flag.
- - A job can not be assigned to more than one agent.
- - An agent have two skillsets. So he can not get a job whose type is not among those skillsets.
- - An agent only receives a job whose type is contained among its secondary skillset if no job from its primary skillset is available.
+ - First in, first out: The first job entered in the system should be assigned first, unless it has an urgent flag.
+ - A job cannot be assigned to more than one agent.
+ - An agent has two skillsets, so he can't get a job whose type is not among those skillsets.
+ - An agent only receives a job whose type is contained among his secondary skillset if no job from his primary skillset is available.
 
 # Considerations
 
-Although the solution seems pretty simple, there is many relevant business rules that mght be considered.
+Although the solution seems pretty simple, there are many relevant business rules that might be considered.
 
-First of all. This is a real problem (already solved at Nubank), a very important one. That's why it was necessary to focus in error prevention and feedback.
+First of all: this is a real problem (already solved at Nubank), and a very important one. That's why it was necessary to focus in error prevention and feedback.
 
-As we're talking about a hiring process, I thought it interesting to use a more verbose language. Elixir sounds good for this purpose.
+As we're talking about a hiring process, I thought it was interesting to use a more verbose language. Elixir sounds good for this purpose.
 
 The code was developed following the Elixir community style guide, available at [this repository](https://github.com/lexmag/elixir-style-guide)
 
@@ -29,14 +29,14 @@ The code was developed following the Elixir community style guide, available at 
 
 The algorithm follows this logical course:
 
- 1. Given the JSON, uses [Poison](https://github.com/devinus/poison) to decode it.
+ 1. Given the JSON, use [Poison](https://github.com/devinus/poison) to decode it.
  2. `convert_json_to_map` function transforms the JSON in a useful list, performing input validations and reordering the job queue by their urgency.
- 3. As we have a reliable maplist, `assign_jobs_to_agents` function verifies, for every job_request, which job is more adequated for those agent. Also, there is a validator to make sure that those agent is existent. If a job is found, the function returns a fresh maplist, dequeing the job.
- 4. When all the job requests are assigned,  `prepare_encoding` will convert the result in a JSON file.
+ 3. Having a reliable maplist, `assign_jobs_to_agents` function verifies, for every job_request, which job is more adequated for which agent. Also, there is a validator to make sure that the agent assigned really exists. If a job is found, the function returns a fresh maplist, dequeueing the job.
+ 4. When all the job requests are assigned, `prepare_encoding` will convert the result in a JSON file.
 
 [![nubank.png](https://s8.postimg.org/dbqxwzhnp/nubank.png)](https://postimg.org/image/s7ph4kt29/)
 
-# Developing considerations
+# Development considerations
 
 During the development period, some situations had to be resolved:
 
@@ -45,11 +45,11 @@ During the development period, some situations had to be resolved:
 
 To deal with situations like this, it seemed interesting to work with custom Validators. Therefore, the algorithm makes use of three modules that check types and relevant fields.
 
-To ensure the quality of the information processing, I developed a script in Lumen that generated a few hundred records to be tested in the homologation environment.
+To ensure the quality of information processing, I developed a script in Lumen that generated a few hundred records to be tested in the homologation environment.
 
 # Running
 
-Before run the algorithm, it must to be install dependencies. Considering Elixir is aleready installed in the environment, open the project in Terminal and tye
+Before running the algorithm, the dependencies must be installed. Considering Elixir is already installed in the environment, open the project in Terminal and type
 
     mix deps.get
 
