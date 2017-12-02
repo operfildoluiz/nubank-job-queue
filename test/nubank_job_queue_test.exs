@@ -1,8 +1,5 @@
 defmodule NubankJobQueueTest do
   use ExUnit.Case
-  doctest NubankJobQueue
+  doctest App.Queue
 
-  test "greets the world" do
-    assert NubankJobQueue.hello() == :world
-  end
 end
