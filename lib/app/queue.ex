@@ -10,21 +10,24 @@ defmodule App.Queue do
     Returns a JSON.
 
     """
-    def main() do
+    def main(input \\ nil) do
 
-        IO.gets("Please, insert minified json: \n") |> String.replace("\n", "")
+        entry =
+        if (input == nil) do
+            IO.gets("Please, insert minified json: \n") |> String.replace("\n", "")
+        else
+            input
+        end
+
+        entry
         |> Poison.decode!
         |> convert_json_to_map()
         |> assign_jobs_to_agents()
+        |> prepare_encoding()
 
     end
 
-    @doc """
-    Create a list to be assigned, ordering jobs by urgent.
-
-    Returns a keyword maplist.
-
-    """
+    # DOC: Create a list to be assigned, ordering jobs by urgent. Returns a keyword maplist.
     # Make sure maplist have proper structure
     defp convert_json_to_map(input), do: convert_json_to_map(input, [agents: [], jobs: [], requests: []])
     defp convert_json_to_map(input, maplist) do
@@ -55,11 +58,7 @@ defmodule App.Queue do
        end
    end
 
-   @doc """
-   Set a new maplist with reordered job list.
-
-   Returns a reorder maplist.
-   """
+   # DOC: Set a new maplist with reordered job list. Returns a reorder maplist.
    defp sort_jobs_by_urgency(maplist) do
         if(maplist[:jobs] == nil) do
             raise ArgumentError, "maplist should have jobs keyword"
@@ -69,11 +68,7 @@ defmodule App.Queue do
 
    end
 
-   @doc """
-   Reorder jobs keyword list based in its urgent flag
-
-   Return a list of jobs
-   """
+   # DOC: Reorder jobs keyword list based in its urgent flag. Returns a list of jobs
    defp reorder_job_list(jobs, list) do
         if ((length(jobs) == 0)) do
             list
@@ -88,11 +83,7 @@ defmodule App.Queue do
    end
 
 
-   @doc """
-   Create a new maplist with :assignment list and dequeue job list
-
-   Return a new maplist
-   """
+   # DOC: Create a new maplist with :assignment list and dequeue job list. Returns a new maplist
    # Make sure this function receives proper arguments
    defp assign_jobs_to_agents(map), do: assign_jobs_to_agents(map, map[:requests])
    defp assign_jobs_to_agents(map, requests) do
@@ -102,6 +93,7 @@ defmodule App.Queue do
             request = hd(requests)
             agent = map[:agents][String.to_atom(request["agent_id"])]
 
+            # Check if agent with received id exists
             if (agent == nil) do
                 raise ArgumentError, "agent_id does not match with any agent"
             end
@@ -125,11 +117,7 @@ defmodule App.Queue do
         end
    end
 
-   @doc """
-   Find a elegible ob based in agent skillsets
-
-   Return a job id
-   """
+   # DOC: Find a elegible job based in agent skillsets. Returns a job id
    defp find_elegible_job(jobs, skillset) do
         if (length(jobs) == 0) do
             nil
@@ -143,11 +131,7 @@ defmodule App.Queue do
         end
    end
 
-   @doc """
-   Set a new assignment with agent_id and job_id given
-
-   Return a maplist
-   """
+   # DOC: Set a new assignment with agent_id and job_id given. Returns a maplist
    defp set_assignment(job_id, agent_id, map) do
         if (map[:assignments] == nil) do
             set_assignment(job_id, agent_id, Keyword.put(map, :assignments, []))
@@ -157,5 +141,14 @@ defmodule App.Queue do
 
             [agents: map[:agents], jobs: jobs, requests: map[:requests], assignments: map[:assignments] ++ assignment]
         end
+   end
+
+   # DOC: Transform the assignment list in a JSON. Returns a encoded JSON
+   defp prepare_encoding(map) do
+       if (map[:assignments] == nil) do
+            {:nil, 'Any job is elegible'}
+       else
+            map[:assignments] |> Enum.map(&([&1])) |> Enum.map(&(Map.new(&1))) |> Poison.encode()
+       end
    end
 end
