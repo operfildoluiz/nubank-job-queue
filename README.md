@@ -1,7 +1,5 @@
 [![20132106327144.jpg](https://s8.postimg.org/of5yopnt1/20132106327144.jpg)](https://postimg.org/image/npn6ccn9d/)
 
-This is a private project developed for Nubank's Software Engineer Hiring Process.
-
 # The context
 
 Since Nubank is a large company, it's very important to assure quality and efficiency in Customer Experience. As customers make questions through social media and service channels, a job queue service sounds good to improve speed and agility in the process of answering everyone.
@@ -21,7 +19,7 @@ Although the solution seems pretty simple, there are many relevant business rule
 
 First of all: this is a real problem (already solved at Nubank), and a very important one. That's why it was necessary to focus in error prevention and feedback.
 
-As we're talking about a hiring process, I thought it was interesting to use a more verbose language. Elixir sounds good for this purpose.
+It was interesting to use a more verbose language. Elixir sounds good for this purpose.
 
 The code was developed following the Elixir community style guide, available at [this repository](https://github.com/lexmag/elixir-style-guide)
 
@@ -62,7 +60,3 @@ Wait for iex starting process, then type:
     App.Queue.main
 
 You can pass a JSON as a string (surrounded by single apostrophe). Otherwise, You'll be prompted to enter the JSON. Just copy and paste and press Enter. Please, make sure to enter a minified JSON.
-
-That's it! I hope you liked and I'm available to clarify and explain code if necessary.
-
-Thank you for this opportunity, that was a great pleasure to me :)
