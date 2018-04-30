@@ -32,7 +32,7 @@ The algorithm follows this logical course:
  3. Having a reliable maplist, `assign_jobs_to_agents` function verifies, for every job_request, which job is more adequated for which agent. Also, there is a validator to make sure that the agent assigned really exists. If a job is found, the function returns a fresh maplist, dequeueing the job.
  4. When all the job requests are assigned, `prepare_encoding` will convert the result in a JSON file.
 
-[![nubank.png](https://s8.postimg.org/dbqxwzhnp/nubank.png)](https://postimg.org/image/s7ph4kt29/)
+[![nubank.png](https://s8.postimg.cc/dbqxwzhnp/nubank.png)](https://postimg.org/image/s7ph4kt29/)
 
 # Development considerations
 
